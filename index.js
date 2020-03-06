@@ -43,13 +43,20 @@ async function run() {
     app.get('/', (req, res) => res.send('Hello World!'))
 
     app.get('/cards', async (req, res) => {
-        // sort- req.query.sort
-
         const cards = await MyModel.find();
-        console.log(cards);
+
+        if (req.query.sort) {
+            const key = req.query.sort;
+
+            cards.sort((item1, item2) =>
+                item1[key] > item2[key] ? -1 : 1,
+            );
+        }
+
         res.send(cards)
     });
 
+    //register
     app.post('/register', function (req, res) {
         console.log(req);
         const username = req.body.username;
@@ -62,7 +69,6 @@ async function run() {
         // req.checkBody('email', 'Email is not valid').isEmail();
         // req.checkBody('username', 'Username is required').notEmpty();
         // req.checkBody('password', 'Password is required').notEmpty();
-        // req.checkBody('password2', 'Passwords do not match').equals(req.body.password);
 
         let errors = null;
 
@@ -75,7 +81,6 @@ async function run() {
                 username: username,
                 password: password
             });
-
             bcrypt.genSalt(10, function (err, salt) {
                 bcrypt.hash(newUser.password, salt, function (err, hash) {
                     if (err) {
